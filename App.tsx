@@ -66,13 +66,19 @@ export default function App() {
 
             {/* Compact Header - Professional Redesign */}
             <header className="px-6 py-5 border-b border-slate-300/80 bg-white/60 backdrop-blur-xl z-50 shrink-0 flex justify-between items-center relative shadow-sm">
-                <div className="flex flex-col gap-0.5">
+                <div className="flex flex-col gap-1">
                     <span className="text-[10px] font-bold tracking-[0.2em] text-slate-500 uppercase font-mono">
                         Scenario 01
                     </span>
-                    <h1 className="text-xl font-bold tracking-tight text-slate-900 leading-none">
-                        System Diagnosis
-                    </h1>
+                    <div className="flex items-center gap-3">
+                        <h1 className="text-xl font-bold tracking-tight text-slate-900 leading-none">
+                            RAG vs MCP
+                        </h1>
+                        <div className="h-5 w-px bg-slate-300"></div>
+                        <span className="text-xl font-medium tracking-tight text-slate-600 leading-none">
+                            System Diagnosis
+                        </span>
+                    </div>
                 </div>
                 <div className="flex items-center gap-4">
                     {/* Live Indicator */}
