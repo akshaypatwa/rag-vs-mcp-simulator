@@ -31,7 +31,7 @@ export const RagVisualizer: React.FC<SimulationProps> = ({ step, isCompact = fal
   const isInput = step === 'input' || step === 'process_start';
 
   // Helper for node rendering
-  const Node = ({ x, y, icon: Icon, label, subLabel, color, isActive, activeColor, description, size }: any) => {
+  const Node = ({ x, y, icon: Icon, label, subLabel, color, isActive, activeColor, description, size, tip, tipPos = 'top' }: any) => {
     // Determine size based on explicit prop or isCompact mode
     const finalSize = size || (isCompact ? "small" : "normal");
 
@@ -42,6 +42,17 @@ export const RagVisualizer: React.FC<SimulationProps> = ({ step, isCompact = fal
     const pPadding = finalSize === "small" ? "p-2.5" : "p-4";
     const iconPadding = finalSize === "small" ? "p-2" : "p-3";
 
+    // Tip Positioning Logic
+    let tipPositionClass = "";
+    switch (tipPos) {
+      case 'top': tipPositionClass = "-top-7 left-1/2 -translate-x-1/2"; break;
+      case 'bottom': tipPositionClass = "-bottom-7 left-1/2 -translate-x-1/2"; break;
+      case 'left': tipPositionClass = "top-1/2 -left-20 -translate-y-1/2"; break;
+      case 'right': tipPositionClass = "top-1/2 -right-20 -translate-y-1/2"; break;
+      case 'top-right': tipPositionClass = "-top-6 -right-10"; break;
+      default: tipPositionClass = "-top-6 left-1/2 -translate-x-1/2";
+    }
+
     return (
       <div
         className={`absolute transform -translate-x-1/2 -translate-y-1/2 flex flex-col items-center z-20 ${widthClass} transition-all duration-500`}
@@ -50,6 +61,16 @@ export const RagVisualizer: React.FC<SimulationProps> = ({ step, isCompact = fal
         {/* Glow Effect */}
         {isActive && (
           <div className={`absolute inset-0 bg-${activeColor}-500/30 blur-[50px] rounded-full scale-125 animate-pulse`} />
+        )}
+
+        {/* Smart Tip Pill */}
+        {tip && (
+          <div className={`absolute ${tipPositionClass} z-40 whitespace-nowrap pointer-events-none`}>
+            <div className={`bg-${color}-600 text-white text-[10px] font-bold px-2.5 py-1 rounded-full shadow-lg shadow-${color}-500/20 border border-white/10 flex items-center gap-1.5 transform transition-all duration-500`}>
+              <div className="w-1 h-1 rounded-full bg-white animate-pulse"></div>
+              {tip}
+            </div>
+          </div>
         )}
 
         {/* Card Container - Filled on Highlight */}
@@ -141,15 +162,23 @@ export const RagVisualizer: React.FC<SimulationProps> = ({ step, isCompact = fal
             </linearGradient>
           </defs>
 
-          {/* Path 0: Docs -> DB (Indexing) */}
+          {/* Path 0: Docs -> DB (Indexing) - Flow Animation */}
           <path
             d={`M ${POS.DOCS.x} ${POS.DOCS.y + 12} L ${POS.DB.x} ${POS.DB.y - 12}`}
-            stroke="#94A3B8"
+            stroke="#3B82F6"
             strokeWidth="0.5"
             fill="none"
-            markerEnd="url(#arrow-slate)"
-            strokeDasharray="3 3"
+            markerEnd="url(#arrow-blue)"
+            strokeDasharray="4 4"
+            className="animate-[dash_20s_linear_infinite] opacity-60"
           />
+          <style>{`
+            @keyframes dash {
+              to {
+                stroke-dashoffset: -100;
+              }
+            }
+          `}</style>
 
           {/* Path 1: User -> Retrieval */}
           <path
@@ -191,7 +220,7 @@ export const RagVisualizer: React.FC<SimulationProps> = ({ step, isCompact = fal
         >
           <div className="bg-white/90 backdrop-blur border border-slate-200 rounded-full px-3 py-1 shadow-sm">
             <div className="text-[9px] md:text-[10px] font-bold text-slate-500 font-sans flex items-center gap-1.5 uppercase tracking-wider">
-              <div className="w-1.5 h-1.5 rounded-full bg-slate-400"></div>
+              <div className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse"></div>
               Indexing
             </div>
           </div>
@@ -207,6 +236,7 @@ export const RagVisualizer: React.FC<SimulationProps> = ({ step, isCompact = fal
           isActive={isInput || isComplete}
           activeColor={isComplete ? "green" : "blue"}
           description="Asks: 'How do I reset keys?'"
+          tip="The Asker" tipPos="top"
         />
 
         {/* Static Docs Node */}
@@ -218,8 +248,9 @@ export const RagVisualizer: React.FC<SimulationProps> = ({ step, isCompact = fal
           subLabel="Source"
           color="slate"
           isActive={false}
-          description="PDFs, Wikis."
+          description="text, pdfs, manuals, etc"
           size="small"
+          tip="Static Facts" tipPos="right"
         />
 
         <Node
@@ -232,6 +263,7 @@ export const RagVisualizer: React.FC<SimulationProps> = ({ step, isCompact = fal
           isActive={isAction || isReturn}
           activeColor="indigo"
           description="Storage & Search"
+          tip="Semantic Match" tipPos="bottom"
         />
 
         <Node
@@ -244,6 +276,7 @@ export const RagVisualizer: React.FC<SimulationProps> = ({ step, isCompact = fal
           isActive={isSynthesis || isReturn}
           activeColor="blue"
           description="Reasoning Engine"
+          tip="The Brain" tipPos="top"
         />
 
         {/* --- Moving Packets --- */}

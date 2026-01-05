@@ -33,13 +33,23 @@ export const McpVisualizer: React.FC<SimulationProps> = ({ step, isCompact = fal
   const isProcessing = step === 'process_start';
 
   // Helper for node rendering
-  const Node = ({ x, y, icon: Icon, label, subLabel, color, isActive, activeColor, description }: any) => {
+  const Node = ({ x, y, icon: Icon, label, subLabel, color, isActive, activeColor, description, tip, tipPos = 'top' }: any) => {
     const widthClass = isCompact ? "w-24 md:w-32" : "w-32 md:w-48";
     const iconSizeClass = isCompact ? "w-5 h-5 md:w-6 md:h-6" : "w-6 h-6 md:w-8 md:h-8";
     const titleClass = isCompact ? "text-[11px] md:text-xs" : "text-xs md:text-sm";
     const descClass = isCompact ? "text-[8px] md:text-[9px]" : "text-[9px] md:text-[10px]";
     const pPadding = isCompact ? "p-2.5" : "p-4";
     const iconPadding = isCompact ? "p-2" : "p-3";
+
+    // Tip Positioning Logic
+    let tipPositionClass = "";
+    switch (tipPos) {
+      case 'top': tipPositionClass = "-top-7 left-1/2 -translate-x-1/2"; break;
+      case 'bottom': tipPositionClass = "-bottom-7 left-1/2 -translate-x-1/2"; break;
+      case 'left': tipPositionClass = "top-1/2 -left-20 -translate-y-1/2"; break;
+      case 'right': tipPositionClass = "top-1/2 -right-20 -translate-y-1/2"; break;
+      default: tipPositionClass = "-top-7 left-1/2 -translate-x-1/2";
+    }
 
     return (
       <div
@@ -49,6 +59,16 @@ export const McpVisualizer: React.FC<SimulationProps> = ({ step, isCompact = fal
         {/* Glow Effect */}
         {isActive && (
           <div className={`absolute inset-0 bg-${activeColor}-500/30 blur-[50px] rounded-full scale-125 animate-pulse`} />
+        )}
+
+        {/* Smart Tip Pill */}
+        {tip && (
+          <div className={`absolute ${tipPositionClass} z-40 whitespace-nowrap pointer-events-none`}>
+            <div className="bg-slate-800/90 text-white/90 backdrop-blur-md px-2 py-0.5 rounded-full text-[9px] font-bold tracking-wide shadow-sm border border-slate-700/50 flex items-center gap-1">
+              <div className={`w-1 h-1 rounded-full bg-${color}-400`}></div>
+              {tip}
+            </div>
+          </div>
         )}
 
         {/* Card Container - 3D Glass Effect */}
@@ -81,12 +101,22 @@ export const McpVisualizer: React.FC<SimulationProps> = ({ step, isCompact = fal
   };
 
   // Small Satellite Node for tools
-  const ToolNode = ({ x, y, icon: Icon, label, color, isActive, description }: any) => {
+  const ToolNode = ({ x, y, icon: Icon, label, color, isActive, description, tip, tipPos = 'right' }: any) => {
     const widthClass = isCompact ? "w-24 md:w-32" : "w-32 md:w-48";
     const iconSizeClass = isCompact ? "w-3.5 h-3.5" : "w-4 h-4";
     const titleClass = isCompact ? "text-[10px] md:text-[11px]" : "text-[11px] md:text-xs";
     const descClass = isCompact ? "text-[8px] md:text-[9px]" : "text-[9px] md:text-[10px]";
     const pPadding = isCompact ? "p-2" : "p-2.5";
+
+    // Tip Positioning Logic
+    let tipPositionClass = "";
+    switch (tipPos) {
+      case 'top': tipPositionClass = "-top-8 left-1/2 -translate-x-1/2"; break;
+      case 'bottom': tipPositionClass = "-bottom-8 left-1/2 -translate-x-1/2"; break;
+      case 'left': tipPositionClass = "top-1/2 -left-3 -translate-y-1/2 -translate-x-full"; break;
+      case 'right': tipPositionClass = "top-1/2 -right-3 -translate-y-1/2 translate-x-full"; break;
+      default: tipPositionClass = "-top-8 left-1/2 -translate-x-1/2";
+    }
 
     return (
       <div
@@ -97,6 +127,16 @@ export const McpVisualizer: React.FC<SimulationProps> = ({ step, isCompact = fal
           }`}
         style={{ left: `${x}%`, top: `${y}%` }}
       >
+        {/* Smart Tip Pill */}
+        {tip && (
+          <div className={`absolute ${tipPositionClass} z-40 whitespace-nowrap pointer-events-none`}>
+            <div className={`bg-${color}-600 text-white text-[10px] font-bold px-2.5 py-1 rounded-full shadow-lg shadow-${color}-500/20 border border-white/10 flex items-center gap-1.5 transform transition-all duration-500`}>
+              <div className="w-1 h-1 rounded-full bg-white animate-pulse"></div>
+              {tip}
+            </div>
+          </div>
+        )}
+
         <div className="flex items-center gap-2 w-full">
           <div className={`p-1.5 rounded-lg transition-colors duration-200 ${isActive ? `bg-gradient-to-br from-${color}-500 to-${color}-600 text-white shadow-md` : `bg-slate-50 border border-slate-100 text-slate-400 group-hover:text-${color}-500`}`}>
             <Icon className={iconSizeClass} />
@@ -211,6 +251,7 @@ export const McpVisualizer: React.FC<SimulationProps> = ({ step, isCompact = fal
           icon={UserIcon} label="User + Client" subLabel="Initiator" color="slate"
           isActive={isInput || isComplete} activeColor="orange"
           description="Asks: 'Why login failing?'"
+          tip="The App" tipPos="top"
         />
 
         <Node
@@ -218,6 +259,7 @@ export const McpVisualizer: React.FC<SimulationProps> = ({ step, isCompact = fal
           icon={ProtocolIcon} label="MCP Host" subLabel="Coordinator" color="orange"
           isActive={isProcessing || isSynthesis || isInput || isComplete} activeColor="orange"
           description="Connects to tools."
+          tip="Traffic Control" tipPos="top"
         />
 
         {/* Exploded Tools */}
